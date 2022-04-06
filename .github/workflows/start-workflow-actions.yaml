@@ -1,40 +1,19 @@
-name: Minimal Android CI Workflow
+name: Workflows with large secrets
 
-on:
-  push:
-    branches:
-      - master
-    tags:
-      - 'v*'
+on: push
 
 jobs:
-  test:
-    name: Run Unit Tests
+  my-job:
+    name: My Job
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v1
-      - name: Setup JDK
-        uses: actions/setup-java@v1
-        with:
-          java-version: 11
-      - name: Run Tests
-        run: bash ./gradlew test --stacktrace  
-  apk:
-    name: Generate APK
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v1
-      - name: Setup JDK
-        uses: actions/setup-java@v1
-        with:
-          java-version: 11
-      - name: Build APK
-        run: bash ./gradlew assembleDebug --stacktrace
-      - name: Upload APK
-        uses: actions/upload-artifact@v1
-        with:
-          name: apk
-          path: app/build/outputs/apk/debug/app-debug.apk 
+      - uses: actions/checkout@v3
+      - name: Decrypt large secret
+        run: ./.github/scripts/decrypt_secret.sh
+        env:
+          LARGE_SECRET_PASSPHRASE: ${{ secrets. LARGE_SECRET_PASSPHRASE1 }}
+      # This command is just an example to show your secret being printed
+      # Ensure you remove any print statements of your secrets. GitHub does
+      # not hide secrets that use this workaround.
+      - name: Test printing your secret (Remove this step in production)
+        run: cat $HOME/secrets/my_secret.json
